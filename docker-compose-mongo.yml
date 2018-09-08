@@ -1,0 +1,29 @@
+version: '2.2'
+
+services:
+  mongodb:
+    image: mongo:3.2.6
+    volumes:
+      - mongo_db_data:/data/db
+    ports:
+      - "27017:27017"
+    healthcheck:
+      # check if port 0x6989 (27017) is bound
+      test: "cat /proc/net/tcp /proc/net/tcp6 | grep '6989'"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  simplewebserver:
+    image: norbjd/simplewebserver:${SIMPLEWEBSERVER_VERSION}
+    depends_on:
+      - mongodb
+    ports:
+      - "4567:4567"
+    restart: always
+    environment:
+      MONGO_HOSTPORT: mongodb:27017
+      MONGO_DATABASE: test
+
+volumes:
+  mongo_db_data:
